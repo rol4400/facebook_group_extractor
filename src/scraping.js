@@ -20,7 +20,18 @@ async function scrapeInfinityItems(
       await page.waitForTimeout(scrollDelay);
     }
   } catch (e) {
-    console.log("loop error: ", e);
+ 
+    const puppeteer = require('puppeteer');
+    if (e instanceof puppeteer.errors.TimeoutError) {
+      // Do something if this is a timeout.
+      console.log("TIME OUT ERROR", items.length);
+      
+    }
+    else{
+      console.log("loop error: ", e);
+    }
+    return items;
+   
   }
   return items;
 }

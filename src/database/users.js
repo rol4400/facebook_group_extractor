@@ -24,8 +24,8 @@ const usersAttribute = [
 const usersHaveGroups = [
   "groupId",
   "userId",
-  "isAdmin",
-  // "memberSince",
+  "groupIdUserId",
+  "memberSince",
   "lastUpdate",
   "additionalData"
 ] 
@@ -34,7 +34,9 @@ const bulkInsertUsers = (db, items) => {
 };
 
 const bulkInsertUsersHaveGroups =(db,items)=>{
-  return bulkInsertMerge(db, "groupsHaveUsers", items.map(x=>_.pick(x, usersHaveGroups)));
+  
+  return bulkInsertMerge(db, "groupsHaveUsers", items.map(x=>_.pick(x, usersHaveGroups)),'groupIdUserId');
+  // console.log(items)
 }
 
 module.exports={

@@ -1,24 +1,32 @@
+//Project doc https://docs.google.com/spreadsheets/d/1CX5qXuuatgkmBrsMR1yJ4A4iB_yHuo74QSP_VSRooqk/edit#gid=0
+const moment = require("moment");
+
 require("dotenv").config();
 const puppeteer = require("puppeteer");
 const mysql = require("mysql");
 
-
-const groupId = "1470416143036444";
-const extractMinAmount = 40;
+const groupId = "189146848441203";
+const extractMinAmount = 300;
 
 const { scrapeInfinityItems } = require("./src/scraping.js");
-const { extractFacebookGroupMember } = require("./src/extractor.js");
+const {
+  extractFacebookGroupMember,
+  memberSinceToDate,
+} = require("./src/extractor.js");
 const { saveData, connectDb } = require("./src/database/database.js");
-const {bulkInsertUsers,bulkInsertUsersHaveGroups} = require("./src/database/users.js");
+const {
+  bulkInsertUsers,
+  bulkInsertUsersHaveGroups,
+} = require("./src/database/users.js");
+
+const { bulkInsertMerge } = require("./src/database/utils");
 
 const db = connectDb();
-
-
 
 const url = `https://www.facebook.com/groups/${groupId}/members`;
 
 async function main() {
-  console.log('scraping started')
+  console.log("scraping started");
   try {
     //LOGIN TO FACEBOOK AND OPEN THE GROUP PAGE
     const browser = await puppeteer.launch({
@@ -33,6 +41,7 @@ async function main() {
 
     const page = await browser.newPage();
     await page.setDefaultNavigationTimeout(0);
+    await page.setDefaultTimeout(60000);
     await page.setViewport({ width: 1000, height: 600 });
     await page.goto("https://www.facebook.com");
     await page.waitForSelector("#email");
@@ -49,17 +58,38 @@ async function main() {
     await page.waitForSelector(listItem, 250, 1500);
 
     //START SCRAPING
-    const items = await scrapeInfinityItems(
+    let groupMembers = await scrapeInfinityItems(
       page,
       extractFacebookGroupMember,
       extractMinAmount
     );
+    console.log("how many records?: ", groupMembers.length);
+    let lastUpdate = moment();
+    groupMembers = groupMembers.map((x) => {
+      lastUpdate = memberSinceToDate(x.memberSince, lastUpdate);
+      return {
+        ...x,
+        memberSince:
+          lastUpdate?.format("YYYY-MM-DD HH:mm:ss") ||
+          lastUpdate.format("YYYY-MM-DD HH:mm:ss"),
+        lastUpdate: moment().format("YYYY-MM-DD HH:mm:ss"),
+      };
+    });
+
+    groupMembers = Array.from(new Set(groupMembers.map((s) => s.id))).map(
+      (id) => {
+        return {
+          id: id,
+          ...Object.assign({}, ...groupMembers.filter((s) => s.id === id)),
+        };
+      }
+    );
 
     //SAVE ALL DATA
-
-    // await bulkInsertUsers(db,items)
-    await bulkInsertUsersHaveGroups(db,items)
-    await console.log("scraping end")
+    // await bulkInsertMerge(db,'groups',group.info)
+    await bulkInsertUsers(db, groupMembers);
+    await bulkInsertUsersHaveGroups(db, groupMembers);
+    await console.log("scraping end");
     //CLOSE
     await browser.close();
     await db.destroy();

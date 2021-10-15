@@ -1,4 +1,3 @@
-//Database schema https://docs.google.com/spreadsheets/d/1CX5qXuuatgkmBrsMR1yJ4A4iB_yHuo74QSP_VSRooqk/edit#gid=0
 require("dotenv").config();
 const { Parser } = require("json2csv");
 const { bulkInsertMerge } = require("./utils");
