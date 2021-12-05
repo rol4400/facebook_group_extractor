@@ -4,7 +4,7 @@ Probably the best free alternative of Phantombuster's [Facebook Group Extractor]
 This extractor is built with puppeteer.js which is one of the safest way to scrape Faecbook data with headless browser technology.
 
 - Scraping on your own device
-- No need proxy
+- Store date on Mysql Database
 - ✨Magic ✨
 
 ## Installation
@@ -22,6 +22,10 @@ Create a .env on the root directory.
 ```sh
 email=YOUR_FACEBOOK_EMAIL_ADDRESS
 password=YOUR_FACEBOOK_EMAIL_ADDRESS
+DATABASE_HOST=YOUR_DATABASE_HOST
+DATABASE_DB=YOUR_DATABASE_DB
+DATABASE_USER=YOUR_DATABASE_USER
+DATABASE_PASSWORD=YOUR_DATABASE_PASSWORD
 ```
 
 Update Scraping target and extract Minimum amount in index.js
@@ -42,8 +46,7 @@ node index.js
 
 ## After Scraping is done
 
-- results.csv
-- results.json
+- it updates the database
 
 ## License
 

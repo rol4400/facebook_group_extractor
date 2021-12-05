@@ -5,8 +5,8 @@ require("dotenv").config();
 const puppeteer = require("puppeteer");
 const mysql = require("mysql");
 
-const groupId = "189146848441203";
-const extractMinAmount = 300;
+const groupId = "544399115660125";
+const extractMinAmount = 5115;
 
 const { scrapeInfinityItems } = require("./src/scraping.js");
 const {
@@ -23,14 +23,14 @@ const { bulkInsertMerge } = require("./src/database/utils");
 
 const db = connectDb();
 
-const url = `https://www.facebook.com/groups/${groupId}/members`;
+const url = `https://www.facebook.com/groups/${groupId}/members/`;
 
 async function main() {
   console.log("scraping started");
   try {
     //LOGIN TO FACEBOOK AND OPEN THE GROUP PAGE
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       slowMo: 20,
     });
     const context = browser.defaultBrowserContext();
